@@ -46,7 +46,7 @@ func NewSubmitSM() PDU {
 // ShouldSplit check if this the user data of submitSM PDU
 func (c *SubmitSM) ShouldSplit() bool {
 	// GSM standard mandates that User Data must be no longer than 140 octet
-	return len(c.Message.messageData) > 140
+	return len(c.Message.messageData) > data.SM_GSM_MSG_LEN
 }
 
 // CanResponse implements PDU interface.
@@ -64,6 +64,12 @@ func (c *SubmitSM) GetResponse() PDU {
 // If the message is short enough and doesn't need splitting,
 // Split() returns an array of length 1
 func (c *SubmitSM) Split() (multiSubSM []*SubmitSM, err error) {
+
+	// no need to split
+	if !c.ShouldSplit() {
+		return []*SubmitSM{c}, nil
+	}
+
 	multiSubSM = []*SubmitSM{}
 
 	multiMsg, err := c.Message.Split()
